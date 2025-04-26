@@ -45,3 +45,7 @@
   when:
     - vault_type != "oss"
 
+- name: Include installation method specific tasks
+  ansible.builtin.include_tasks:
+    file: vault_client.yml
+

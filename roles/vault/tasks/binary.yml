@@ -11,11 +11,20 @@
     system: true
 
 - name: binary | Create Vault user
+  when: 1 == 2
   ansible.builtin.user:
     name: "{{ vault_user }}"
     create_home: false
     system: true
     shell: "{{ vault_user_shell }}"
+    group: "{{ vault_group }}"
+
+- name: binary | Create Vault user
+  ansible.builtin.user:
+    name: "{{ vault_user }}"
+    create_home: true        # Allow home directory for better CLI experience
+    system: true
+    shell: /bin/bash         # Use bash for interactive usage
     group: "{{ vault_group }}"
 
 - name: binary | Create Vault download directory

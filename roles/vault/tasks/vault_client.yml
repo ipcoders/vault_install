@@ -1,0 +1,50 @@
+---
+- name: Define Vault CLI version
+  ansible.builtin.set_fact:
+    vault_cli_version: "1.19.2"
+
+- name: Create temporary directory for Vault CLI download
+  ansible.builtin.file:
+    path: /tmp/vault_cli_install
+    state: directory
+    mode: '0755'
+
+- name: Download Vault CLI binary
+  ansible.builtin.get_url:
+    url: "https://releases.hashicorp.com/vault/{{ vault_cli_version }}/vault_{{ vault_cli_version }}_linux_amd64.zip"
+    dest: "/tmp/vault_cli_install/vault_{{ vault_cli_version }}_linux_amd64.zip"
+    mode: '0644'
+
+- name: Extract Vault CLI binary
+  ansible.builtin.unarchive:
+    src: "/tmp/vault_cli_install/vault_{{ vault_cli_version }}_linux_amd64.zip"
+    dest: /usr/local/bin/
+    remote_src: yes
+    mode: '0755'
+
+- name: Verify Vault CLI installation
+  ansible.builtin.command: vault --version
+  register: vault_cli_version_output
+
+- name: Display Vault CLI version
+  ansible.builtin.debug:
+    msg: "Installed Vault CLI version: {{ vault_cli_version_output.stdout }}"
+
+- name: Clean up Vault CLI temporary files
+  ansible.builtin.file:
+    path: /tmp/vault_cli_install
+    state: absent
+
+- name: Configure Vault CLI environment system-wide
+  ansible.builtin.copy:
+    dest: /etc/profile.d/vault_env.sh
+    content: |
+      export VAULT_ADDR="https://98.81.145.60:8200"
+      export VAULT_SKIP_VERIFY=true
+    mode: '0644'
+
+- name: Source vault_env.sh for current session
+  ansible.builtin.shell: source /etc/profile.d/vault_env.sh
+  args:
+    executable: /bin/bash
+
